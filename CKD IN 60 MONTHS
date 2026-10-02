@@ -1,0 +1,96 @@
+Identify all unique adult patients (age ≥18 years) with CKD G3a–G5 and qualifying CKD evidence documented during the last 60 months from the query execution date.
+
+Include ONLY patients who are NOT on dialysis and have NO documented ESKD/ESRD diagnosis or evidence of dialysis treatment.
+
+Search ALL care settings. Do not require hospitalization, an AKI diagnosis, or any other associated diagnosis.
+
+CKD IDENTIFICATION — USE LABORATORY CRITERIA OR ICD-10-CM CODES:
+
+A. Laboratory-based identification:
+- At least two outpatient or otherwise clinically stable eGFR measurements <60 mL/min/1.73 m², separated by ≥3 months.
+- At least one qualifying measurement must fall within the last 60 months. Earlier results may support chronicity.
+- Do not use eGFR measured during AKI to establish CKD or assign CKD stage.
+- Classify CKD using stable eGFR:
+  G3a: 45 to <60 mL/min/1.73 m².
+  G3b: 30 to <45 mL/min/1.73 m².
+  G4: 15 to <30 mL/min/1.73 m².
+  G5: <15 mL/min/1.73 m².
+- Record the supporting eGFR values and dates.
+
+OR
+
+B. ICD-10-CM-based identification:
+Include patients with any of the following codes documented in encounter diagnoses or an active problem list during the last 60 months:
+
+N18.30 — CKD stage 3, unspecified
+OR N18.31 — CKD stage 3a
+OR N18.32 — CKD stage 3b
+OR N18.4 — CKD stage 4
+OR N18.5 — CKD stage 5
+
+- A qualifying ICD-10-CM code alone is sufficient for cohort identification.
+- Do not require laboratory confirmation for code-identified patients.
+- Label patients without supporting longitudinal laboratory evidence as “code-identified; laboratory confirmation unavailable.”
+- Do not infer G3a versus G3b from N18.30 alone.
+- Preserve code-derived and laboratory-derived stages separately and flag discrepancies.
+
+MANDATORY EXCLUSIONS — NO ESKD AND NO DIALYSIS:
+
+Apply these exclusions regardless of whether CKD was identified through laboratory results or diagnosis codes.
+
+Exclude any patient with ANY of the following documented during the last 60 months or in available earlier history:
+
+- ICD-10-CM N18.6: end-stage renal disease.
+- ICD-10-CM Z99.2: dependence on renal dialysis.
+- An affirmative ESKD/ESRD diagnosis in encounter diagnoses, problem lists, nephrology notes, discharge summaries, or other clinical documentation.
+- A completed dialysis procedure record or dialysis procedure note.
+- Clinical documentation confirming receipt of hemodialysis, peritoneal dialysis, continuous renal replacement therapy, or another dialysis treatment.
+
+Search diagnosis codes, procedure codes, procedure records, dialysis flowsheets, and clinical/procedure notes. Do not rely on diagnosis codes alone to identify dialysis.
+
+For this strict no-documented-dialysis cohort, prior temporary dialysis for AKI also counts as an exclusion.
+
+Do not interpret dialysis education, future dialysis planning, access placement alone, an unperformed or canceled dialysis order, or a negated statement such as “not on dialysis” as evidence that dialysis occurred.
+
+Do not exclude CKD G5 solely because eGFR is <15 or N18.5 is present; require a separate ESKD or dialysis exclusion flag.
+
+Flag incomplete records or uncertain ESKD/dialysis status for separate review rather than assuming absence.
+
+FINAL BOOLEAN LOGIC:
+
+Age ≥18 years
+AND qualifying CKD evidence within the last 60 months
+AND (
+    laboratory-based CKD criteria
+    OR ICD-10-CM = N18.30
+    OR ICD-10-CM = N18.31
+    OR ICD-10-CM = N18.32
+    OR ICD-10-CM = N18.4
+    OR ICD-10-CM = N18.5
+)
+AND NOT (
+    ICD-10-CM = N18.6
+    OR ICD-10-CM = Z99.2
+    OR documented ESKD/ESRD diagnosis
+    OR completed dialysis procedure
+    OR procedure note confirming dialysis
+    OR clinical documentation confirming dialysis treatment
+)
+
+OUTPUT:
+
+Return one row per unique eligible patient with:
+- Patient identifier.
+- Age at first qualifying date.
+- First qualifying CKD date within the last 60 months.
+- Laboratory-derived CKD stage and corresponding measurement date.
+- Code-derived CKD stage.
+- Identification method: laboratory only, ICD code only, or both.
+- Qualifying ICD-10-CM codes and dates.
+- Supporting eGFR values and dates.
+- ESKD/dialysis screening result: “No documented ESKD or dialysis in available records.”
+- Missing-data or stage-discrepancy flags.
+
+Return patients with uncertain exclusion status separately for review.
+
+Do not apply any care-setting restriction or duplicate patients across encounters.
