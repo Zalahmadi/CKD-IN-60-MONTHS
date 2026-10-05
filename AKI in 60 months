@@ -1,0 +1,99 @@
+Identify all **adult inpatient admissions during the last 60 months** in which the patient had **acute kidney injury (AKI)** identified by either **creatinine-based KDIGO criteria OR an AKI ICD diagnosis**.
+
+### AKI definition
+
+Include an admission if **either** of the following is present:
+
+**A. Creatinine-based KDIGO AKI**
+Use actual **serum/plasma creatinine values** and identify AKI when either criterion is met:
+
+- Increase in serum creatinine **≥0.3 mg/dL within 48 hours**, OR
+- Increase in serum creatinine to **≥1.5 times baseline within 7 days**
+
+**Do NOT use the urine-output KDIGO criterion.**
+
+For creatinine-based AKI:
+- Search all relevant inpatient and available pre-admission laboratory tables.
+- Use serum/plasma creatinine only; exclude urine creatinine.
+- Prefer actual measured historical creatinine rather than diagnosis codes or problem lists.
+- Do not use changes in eGFR as the AKI diagnostic criterion.
+- Do not back-calculate an assumed baseline creatinine from an assumed normal eGFR.
+- Identify the creatinine value and timestamp that first satisfied KDIGO.
+- Identify the baseline/reference creatinine used and its timestamp.
+- Identify peak creatinine during the admission.
+- Assign creatinine-based KDIGO AKI stage when possible.
+
+**B. ICD-coded AKI**
+Also include admissions with an **AKI/acute kidney failure ICD diagnosis**, including the applicable **ICD-10-CM N17.* family**, even if available laboratory data are insufficient to independently confirm KDIGO.
+
+Search all relevant diagnosis sources, including:
+- Encounter diagnoses
+- Admission diagnoses
+- Principal diagnosis
+- Secondary diagnoses
+- Hospital billing/claims diagnoses
+- Discharge diagnoses
+
+Do **not** rely only on the problem list.
+
+### Classification
+
+For every qualifying admission create:
+
+- `AKI_by_KDIGO_creatinine = YES/NO`
+- `AKI_by_ICD = YES/NO`
+- `AKI_identification = KDIGO_ONLY / ICD_ONLY / BOTH`
+
+Keep **ICD-only cases** separate so they can be reviewed rather than assuming they met laboratory KDIGO criteria.
+
+### Output
+
+Include:
+- Patient ID
+- Encounter ID
+- Admission date/time
+- Discharge date/time
+- Baseline/reference creatinine
+- Baseline creatinine date/time
+- Creatinine that first met KDIGO
+- AKI onset date/time
+- Peak inpatient creatinine
+- KDIGO AKI stage if determinable
+- AKI ICD code(s)
+- Principal vs secondary AKI diagnosis
+- `AKI_by_KDIGO_creatinine`
+- `AKI_by_ICD`
+- `AKI_identification`
+
+### Quality control
+
+- First inspect the REACH schema; **do not guess table or column names**.
+- Search **all relevant laboratory, encounter, diagnosis, and claims tables**.
+- Deduplicate creatinine and diagnosis records.
+- Restrict qualifying encounters to **inpatient admissions within the last 60 months**.
+- Return **one row per qualifying AKI admission**.
+- Do not require both KDIGO and ICD; the inclusion rule is **KDIGO creatinine criteria OR ICD-coded AKI**.
+- Do not use urine-output criteria.
+- Do not exclude CKD, dialysis, or deaths unless separately requested.
+- Flag cases where laboratory data are insufficient to verify an ICD-coded AKI rather than excluding them.
+
+Provide counts for:
+1. Total qualifying AKI admissions
+2. KDIGO creatinine + ICD
+3. KDIGO creatinine only
+4. ICD only
+5. AKI stage 1
+6. AKI stage 2
+7. AKI stage 3
+8. Cases where KDIGO stage cannot be determined
+
+Before generating the final query, show:
+1. Tables searched
+2. Join keys
+3. Creatinine component identification
+4. Baseline/reference creatinine logic
+5. KDIGO creatinine logic
+6. ICD diagnosis logic
+7. Deduplication logic
+
+Then generate the final **Databricks SQL/Spark SQL query**.
