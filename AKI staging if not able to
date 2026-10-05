@@ -1,0 +1,77 @@
+Using the **AKI admissions identified by ICD diagnosis that were not previously classified by KDIGO**, evaluate each encounter using **serum/plasma creatinine values** and assign a **creatinine-based KDIGO AKI stage**.
+
+**Do NOT use urine-output criteria.**
+
+Search all available inpatient and pre-admission laboratory tables.
+
+### Baseline creatinine hierarchy
+
+For each AKI encounter, identify the most credible baseline/reference serum creatinine using the following hierarchy:
+
+1. **Preferred:** stable outpatient/pre-admission serum creatinine before the AKI hospitalization.
+2. If no pre-admission creatinine is available and the patient developed AKI after admission, use the **earliest reliable inpatient creatinine preceding the AKI rise**.
+3. If the patient presented with AKI and there is **no pre-admission baseline**, use the **lowest reliable serum creatinine reached during the index hospitalization after the AKI**, including the discharge creatinine if it is the lowest available value and the patient did not receive dialysis/KRT.
+4. Label this clearly as an **inpatient surrogate baseline**, not a known pre-AKI baseline.
+5. If kidney function did not meaningfully recover and no credible baseline/reference creatinine can be identified, classify the patient as `UNABLE_TO_STAGE` rather than forcing a KDIGO stage.
+
+Do **not** automatically use the discharge creatinine if a lower or more credible recovered creatinine exists during the hospitalization.
+
+Do not back-calculate an assumed baseline creatinine from eGFR.
+
+### KDIGO serum-creatinine staging
+
+Determine the **highest stage reached during the AKI encounter**:
+
+- **Stage 1:** SCr increase ≥0.3 mg/dL within 48 hours OR SCr 1.5–1.9× baseline/reference.
+- **Stage 2:** SCr 2.0–2.9× baseline/reference.
+- **Stage 3:** SCr ≥3.0× baseline/reference OR SCr ≥4.0 mg/dL.
+
+For patients already excluded from dialysis/KRT, stage using the serum-creatinine criteria only.
+
+### Required fields
+
+Create:
+
+- `baseline_creatinine`
+- `baseline_creatinine_date`
+- `baseline_source = PRE_ADMISSION / EARLY_INPATIENT / INPATIENT_NADIR / DISCHARGE_SURROGATE`
+- `baseline_confidence = HIGH / MODERATE / LOW`
+- `admission_creatinine`
+- `peak_creatinine`
+- `peak_creatinine_date`
+- `discharge_creatinine`
+- `discharge_creatinine_date`
+- `creatinine_ratio_to_reference`
+- `KDIGO_creatinine_stage = 1 / 2 / 3 / NOT_CONFIRMED / UNABLE_TO_STAGE`
+
+For cases using discharge or inpatient nadir as the reference, create:
+
+`KDIGO_stage_using_surrogate_baseline = YES`
+
+so these patients can be separated in sensitivity analyses.
+
+### Important quality control
+
+- First inspect the REACH schema; **do not guess table or column names**.
+- Search all available inpatient and outpatient serum/plasma creatinine tables.
+- Exclude urine creatinine.
+- Deduplicate laboratory measurements.
+- Use actual specimen/collection timestamps when available.
+- Do not use eGFR during AKI to stage AKI.
+- Do not force an ICD-coded AKI into a KDIGO stage when the creatinine trajectory is insufficient.
+- If discharge creatinine remains substantially elevated and there is no evidence of renal recovery, do **not** assume it represents baseline.
+- Return one row per AKI encounter.
+
+Provide counts for:
+
+1. Stage 1
+2. Stage 2
+3. Stage 3
+4. NOT_CONFIRMED
+5. UNABLE_TO_STAGE
+6. Staged using true pre-admission baseline
+7. Staged using early inpatient baseline
+8. Staged using inpatient nadir
+9. Staged using discharge creatinine as surrogate baseline
+
+Then generate the final **Databricks SQL/Spark SQL query**.
