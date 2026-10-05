@@ -1,0 +1,34 @@
+Using the **AKI admissions identified by ICD diagnosis that were not previously classified by KDIGO**, evaluate each encounter using **serum/plasma creatinine values** and assign a **creatinine-based KDIGO AKI stage**.
+
+**Do NOT use urine-output criteria.**
+
+Search all available inpatient and pre-admission laboratory tables.
+
+For each encounter:
+- Identify the best available **pre-AKI baseline serum creatinine**, prioritizing stable outpatient/pre-admission values.
+- Do not use eGFR during AKI to stage AKI.
+- Do not back-calculate an assumed baseline creatinine.
+- Retrieve all serum/plasma creatinine values during the AKI encounter.
+- Determine the **highest KDIGO stage reached**.
+
+Classify:
+
+- **Stage 1:** SCr increase ≥0.3 mg/dL within 48 hours OR 1.5–1.9× baseline.
+- **Stage 2:** SCr 2.0–2.9× baseline.
+- **Stage 3:** SCr ≥3.0× baseline OR SCr ≥4.0 mg/dL.
+
+Create:
+- `baseline_creatinine`
+- `baseline_date`
+- `peak_creatinine`
+- `peak_creatinine_date`
+- `creatinine_ratio_to_baseline`
+- `KDIGO_creatinine_stage = 1 / 2 / 3 / NOT_CONFIRMED / UNABLE_TO_STAGE`
+
+If an ICD-coded AKI admission does **not** meet serum-creatinine KDIGO criteria, classify it as `NOT_CONFIRMED`; do not force a stage.
+
+If baseline data are inadequate, classify as `UNABLE_TO_STAGE`.
+
+Also report counts for each stage, NOT_CONFIRMED, and UNABLE_TO_STAGE.
+
+First inspect the REACH schema; **do not guess table or column names**. Deduplicate laboratory results and generate the final **Databricks SQL/Spark SQL query**.
