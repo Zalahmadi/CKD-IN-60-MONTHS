@@ -1,0 +1,102 @@
+Using the **previously identified AKI admissions from the last 60 months**, identify patients who **did NOT receive dialysis/kidney replacement therapy during the index AKI hospitalization**.
+
+Do **not** rely only on ICD diagnosis codes or the problem list.
+
+### Search all available evidence of dialysis during the index admission
+
+Search all relevant inpatient sources, including:
+
+- Hemodialysis procedure notes
+- Nephrology dialysis/procedure notes
+- Dialysis treatment records
+- Hemodialysis flowsheets
+- CRRT records
+- SLED/PIRRT records
+- Peritoneal dialysis treatment records
+- Dialysis orders
+- Dialysis administration/treatment documentation
+- Procedure tables
+- CPT/HCPCS procedure codes
+- ICD-10-PCS procedure codes
+- Charge/billing procedure data
+- Dialysis nursing documentation
+- ICU flowsheets
+- Vascular-access/procedure documentation
+- Encounter procedure tables
+- Structured note/procedure-note tables if available
+
+### Classification
+
+For each AKI admission create:
+
+- `hemodialysis_during_admission = YES/NO/UNCERTAIN`
+- `CRRT_during_admission = YES/NO/UNCERTAIN`
+- `SLED_PIRRT_during_admission = YES/NO/UNCERTAIN`
+- `peritoneal_dialysis_during_admission = YES/NO/UNCERTAIN`
+- `any_KRT_during_admission = YES/NO/UNCERTAIN`
+
+Include in the final cohort only patients with:
+
+`any_KRT_during_admission = NO`
+
+### Important rules
+
+- Restrict the search to the **same index AKI inpatient encounter**.
+- A dialysis **procedure/treatment note or completed dialysis treatment** should count as dialysis even if no dialysis ICD diagnosis is present.
+- A dialysis procedure code should count as evidence of dialysis when it represents an actual treatment.
+- Do **not** classify a patient as dialyzed solely because a dialysis catheter was inserted.
+- Do not count a dialysis order that was cancelled or never performed unless there is evidence treatment actually occurred.
+- Do not assume “no dialysis” simply because no ESRD diagnosis is present.
+- If documentation is conflicting or incomplete, classify as `UNCERTAIN` rather than automatically placing the patient in the no-dialysis group.
+
+### Output
+
+Include:
+
+- Patient ID
+- Encounter ID
+- Admission date
+- Discharge date
+- AKI identification method
+- KDIGO stage if available
+- Hemodialysis status
+- CRRT status
+- SLED/PIRRT status
+- Peritoneal dialysis status
+- `any_KRT_during_admission`
+- Dialysis procedure code(s), if present
+- Dialysis procedure-note indicator
+- Dialysis treatment date/time
+- Source table(s) used
+- Reason for dialysis classification
+
+### Quality control
+
+- First inspect the REACH schema; **do not guess table or column names**.
+- Search **all relevant procedure, note, billing, flowsheet, and treatment tables**.
+- Deduplicate dialysis records.
+- Confirm that dialysis evidence belongs to the correct AKI encounter.
+- Return **one row per AKI admission**.
+
+Provide counts for:
+
+1. Total AKI admissions
+2. Any KRT during admission
+3. Hemodialysis
+4. CRRT
+5. SLED/PIRRT
+6. Peritoneal dialysis
+7. No KRT during admission
+8. Uncertain dialysis status
+
+Before generating the final query, show:
+
+1. All dialysis-related tables searched
+2. Join keys
+3. Procedure-code logic
+4. Procedure-note logic
+5. Dialysis treatment/flowsheet logic
+6. How cancelled orders and catheter placement are handled
+7. Final `any_KRT_during_admission` classification logic
+
+Then generate the final **Databricks SQL/Spark SQL query** for patients with **no dialysis/KRT during the index AKI admission**.
