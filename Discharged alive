@@ -1,0 +1,85 @@
+Using the **previously identified AKI admissions from the last 60 months**, determine whether each patient was **alive at the time of discharge from the index AKI hospitalization**.
+
+Search **all relevant encounter, discharge, disposition, mortality, and death-record tables**. Do not rely on a single field.
+
+### Determine discharge survival status
+
+For each index AKI encounter, create:
+
+- `discharged_alive = YES / NO / UNCERTAIN`
+- `in_hospital_death = YES / NO / UNCERTAIN`
+
+Classify **YES — discharged alive** when:
+- Discharge disposition indicates home, facility, rehabilitation, skilled nursing, hospice, transfer to another hospital/facility, or another living disposition, AND
+- There is no death/expiration timestamp occurring during the hospitalization.
+
+Classify **NO — not discharged alive** when:
+- Discharge disposition/status indicates **expired/deceased**, OR
+- A death timestamp/date occurs **on or before the discharge date/time during that hospitalization**, OR
+- Other encounter-level mortality documentation confirms in-hospital death.
+
+Classify **UNCERTAIN** when:
+- Discharge disposition is missing or conflicting,
+- Death date/time cannot be reliably aligned with the hospitalization,
+- Encounter and mortality tables disagree.
+
+### Search all relevant sources
+
+Include, if available:
+
+- Inpatient encounter table
+- Discharge disposition/status
+- Hospital discharge records
+- Mortality/death tables
+- Date/time of death
+- Patient demographic/deceased-status fields
+- Claims/discharge status fields
+- Encounter outcome tables
+- Structured discharge documentation
+- Other structured mortality indicators
+
+### Important rules
+
+- Restrict classification to the **same index AKI inpatient encounter**.
+- Do not classify a patient as an in-hospital death solely because they have a death date after discharge.
+- A discharge to **hospice** still counts as **discharged alive** unless death occurred before discharge.
+- A transfer to another hospital/facility counts as **discharged alive** from the index encounter.
+- If the death date equals the discharge date but no time is available, flag as `UNCERTAIN` unless disposition explicitly indicates expired.
+- Do not use problem-list diagnoses to determine mortality.
+
+### Output
+
+Include:
+- Patient ID
+- Encounter ID
+- Admission date/time
+- Discharge date/time
+- Discharge disposition
+- Death date/time if available
+- `in_hospital_death`
+- `discharged_alive`
+- Source table(s) used
+- Reason for classification
+
+### Quality control
+
+- First inspect the REACH schema; **do not guess table or column names**.
+- Cross-check discharge disposition against death records.
+- Deduplicate mortality records.
+- Flag conflicting records rather than assuming.
+- Return **one row per AKI admission**.
+
+Provide counts for:
+1. Total AKI admissions
+2. Discharged alive
+3. In-hospital deaths
+4. Uncertain survival status
+
+Before generating the final query, show:
+1. Tables searched
+2. Join keys
+3. Discharge-disposition logic
+4. Death-record logic
+5. Conflict-resolution logic
+
+Then generate the final **Databricks SQL/Spark SQL query** for the AKI admissions with discharge survival status.
